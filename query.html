@@ -6,7 +6,7 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
-      $("#send_btn").click(function() {
+      $("#http_btn").click(function() {
         console.log("Received raw SQL.");
 
         var data = $('#message').val();
@@ -15,7 +15,7 @@
         $.ajax({
           method: "POST",
           url: "http://127.0.0.1:4567/",
-          data: {'data' : data},
+          data: {'query' : data},
           success: function(data) {
             alert(data);
           }
@@ -30,9 +30,9 @@
   <body>
     <form id="sql_form" action=""><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
 		  <textarea id="message" name="message" cols="40" rows="30">
-        SELECT tags.*, taggings.tags_count AS count FROM &quot;tags&quot; JOIN (SELECT taggings.tag_id, COUNT(taggings.tag_id) AS tags_count FROM &quot;taggings&quot; INNER JOIN projects ON projects.id = taggings.taggable_id WHERE (taggings.taggable_type = &#x27;Project&#x27; AND taggings.context = &#x27;tags&#x27;) AND (taggings.taggable_id IN(SELECT projects.id FROM &quot;projects&quot; )) GROUP BY taggings.tag_id HAVING COUNT(taggings.tag_id) &gt; 0) AS taggings ON taggings.tag_id = tags.id"
+        SELECT "projects".* FROM "projects" ORDER BY rating DESC, created_at DESC LIMIT 3
       </textarea>
-		  <button id="send_btn" name="commit" type="submit" value="Send" />
+		  <button id="http_btn" name="commit" type="submit">Test HTTP</button>
 </form>
 
   </body>

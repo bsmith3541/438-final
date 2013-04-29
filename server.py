@@ -9,7 +9,7 @@ import Queue
 
 import json
 import sqlite3
-DEFAULT_DB = 'testdb.sqlite'
+DEFAULT_DB = 'development.sqlite3'
 
 class MainHandler(tornado.web.RequestHandler):
   def get(self):
@@ -17,7 +17,16 @@ class MainHandler(tornado.web.RequestHandler):
     self.write(loader.load("query.html").generate())
 
   def post(self):
-    self.write("blah")
+    query = self.get_argument('query', '')
+
+    conn = sqlite3.connect(DEFAULT_DB)
+    c = conn.cursor()
+    c.execute(query)
+    results = c.fetchone()
+    self.write(json.dumps(results))
+    conn.close()
+
+
 
 class WSHandler(tornado.websocket.WebSocketHandler):
   def open(self):
