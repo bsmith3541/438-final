@@ -14,7 +14,10 @@ DEFAULT_DB = 'testdb.sqlite'
 class MainHandler(tornado.web.RequestHandler):
   def get(self):
     loader = tornado.template.Loader(".")
-    self.write(loader.load("static/test.html").generate())
+    self.write(loader.load("query.html").generate())
+
+  def post(self):
+    self.write("blah")
 
 class WSHandler(tornado.websocket.WebSocketHandler):
   def open(self):
