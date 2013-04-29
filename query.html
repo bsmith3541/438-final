@@ -7,6 +7,8 @@
     <script type="text/javascript">
     $(document).ready(function() {
       $("#http_btn").click(function() {
+        var time1 = $.now();
+        console.log("current time: " + time1);
         console.log("Received raw SQL.");
 
         var data = $('#message').val();
@@ -20,7 +22,8 @@
             alert(data);
           }
         });
-
+        var time2 = $.now();
+        console.log("query sent at " + time2);
         return false;
       });
     })
