@@ -1,0 +1,43 @@
+DOUBLE CHECK ALL QUERIES
+
+1. when we run the  ActsAsTaggableOn::Tag Load (0.2ms)  SELECT "tags".* FROM "tags" WHERE (lower(name) = 'startups') query, it also runs the ActsAsTaggableOn::Tag Load (0.3ms)  SELECT tags.*, taggings.tags_count AS count FROM "tags" JOIN (SELECT taggings.tag_id, COUNT(taggings.tag_id) AS tags_count FROM "taggings" INNER JOIN projects ON projects.id = taggings.taggable_id WHERE (taggings.taggable_type = 'Project' AND taggings.context = 'tags') AND (taggings.taggable_id IN(SELECT projects.id FROM "projects" )) GROUP BY taggings.tag_id HAVING COUNT(taggings.tag_id) > 0) AS taggings ON taggings.tag_id = tags.id
+  Rendered projects/index.html.erb within layouts/application (3.9ms)
+  Rendered layouts/_header.html.erb (0.6ms)
+Completed 200 OK in 22ms (Views: 19.1ms | ActiveRecord: 0.8ms)
+query
+2.  Project Load (0.1ms)  SELECT "projects".* FROM "projects" WHERE "projects"."id" = ? LIMIT 1  [["id", "4"]]
+  ActsAsTaggableOn::Tag Load (0.2ms)  SELECT "tags".* FROM "tags" INNER JOIN "taggings" ON "tags"."id" = "taggings"."tag_id" WHERE "taggings"."taggable_id" = 4 AND "taggings"."taggable_type" = 'Project' AND (taggings.context = 'tags' AND taggings.tagger_id IS NULL)
+   (0.1ms)  SELECT COUNT(*) FROM "comments" WHERE "comments"."project_id" = 4
+  Rendered projects/show.html.erb within layouts/application (5.3ms)
+  Rendered layouts/_header.html.erb (0.6ms)
+Completed 200 OK in 22ms (Views: 20.4ms | ActiveRecord: 0.5ms)
+
+3.  Project Load (0.2ms)  SELECT "projects".* FROM "projects" ORDER BY rating DESC, created_at DESC LIMIT 3
+  User Load (0.2ms)  SELECT "users".* FROM "users" 
+  ActsAsTaggableOn::Tag Load (0.3ms)  SELECT tags.*, taggings.tags_count AS count FROM "tags" JOIN (SELECT taggings.tag_id, COUNT(taggings.tag_id) AS tags_count FROM "taggings" INNER JOIN projects ON projects.id = taggings.taggable_id WHERE (taggings.taggable_type = 'Project' AND taggings.context = 'tags') AND (taggings.taggable_id IN(SELECT projects.id FROM "projects" )) GROUP BY taggings.tag_id HAVING COUNT(taggings.tag_id) > 0) AS taggings ON taggings.tag_id = tags.id
+  Rendered projects/_project.html.erb (1.4ms)
+  Rendered static_pages/home.html.erb within layouts/application (4.3ms)
+  Rendered layouts/_header.html.erb (0.6ms)
+Completed 200 OK in 22ms (Views: 20.0ms | ActiveRecord: 0.7ms)
+
+4.  Project Load (0.5ms)  SELECT "projects".* FROM "projects" WHERE "projects"."id" = ? LIMIT 1  [["id", "4"]]
+  ActsAsTaggableOn::Tag Load (1.3ms)  SELECT "tags".* FROM "tags" INNER JOIN "taggings" ON "tags"."id" = "taggings"."tag_id" WHERE "taggings"."taggable_id" = 4 AND "taggings"."taggable_type" = 'Project' AND (taggings.context = 'tags' AND taggings.tagger_id IS NULL)
+   (0.2ms)  SELECT COUNT(*) FROM "comments" WHERE "comments"."project_id" = 4
+  CACHE (0.0ms)  SELECT COUNT(*) FROM "comments" WHERE "comments"."project_id" = 4
+  Comment Load (0.3ms)  SELECT "comments".* FROM "comments" WHERE "comments"."project_id" = 4
+  Rendered projects/show.html.erb within layouts/application (67.4ms)
+  Rendered layouts/_header.html.erb (4.4ms)
+Completed 200 OK in 199ms (Views: 170.9ms | ActiveRecord: 2.4ms)
+
+5. Processing by StaticPagesController#home as HTML
+  Project Load (0.2ms)  SELECT "projects".* FROM "projects" ORDER BY rating DESC, created_at DESC LIMIT 3
+  User Load (0.2ms)  SELECT "users".* FROM "users" 
+  ActsAsTaggableOn::Tag Load (0.3ms)  SELECT tags.*, taggings.tags_count AS count FROM "tags" JOIN (SELECT taggings.tag_id, COUNT(taggings.tag_id) AS tags_count FROM "taggings" INNER JOIN projects ON projects.id = taggings.taggable_id WHERE (taggings.taggable_type = 'Project' AND taggings.context = 'tags') AND (taggings.taggable_id IN(SELECT projects.id FROM "projects" )) GROUP BY taggings.tag_id HAVING COUNT(taggings.tag_id) > 0) AS taggings ON taggings.tag_id = tags.id
+  Rendered projects/_project.html.erb (0.9ms)
+  Rendered static_pages/home.html.erb within layouts/application (3.3ms)
+  Rendered layouts/_header.html.erb (0.6ms)
+Completed 200 OK in 20ms (Views: 18.3ms | ActiveRecord: 0.7ms)
+
+
+6.SELECT "projects".* FROM "projects" ORDER BY rating DESC, created_at DESC LIMIT 3
+
