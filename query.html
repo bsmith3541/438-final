@@ -129,6 +129,7 @@
             endTime = $.now();
             totalTime = endTime - startTime;
             console.log('Total time for 1 WS request: ' + totalTime);
+            socket.close();
           }
         }
 
@@ -138,6 +139,7 @@
       });
     })
 
+    // Fuction to open websocket connection
     function openWs() {
 
       var socket;
