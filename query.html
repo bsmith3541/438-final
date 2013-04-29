@@ -6,24 +6,159 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
-      $("#http_btn").click(function() {
+
+      // Test HTTP successive requests
+      $("#http_successive_btn").click(function() {
         console.log("Received raw SQL.");
 
         var data = $('#message').val();
-        alert(data);
+
+        var doneCounter = 0;
+        var startTime = $.now();
+        var endTime;
+        var totalTime;
+
+        for (var i = 0; i < 100; i++) {
+          $.ajax({
+            method: "POST",
+            url: "http://127.0.0.1:4567/",
+            data: {'query' : data},
+            success: function(data) {
+              doneCounter++;
+              if (doneCounter == 100) {
+                endTime = $.now();
+                totalTime = endTime - startTime;
+                console.log('Total time for 100 HTTP requests: ' + totalTime);
+              }
+            }
+          });
+        }
+
+        return false;
+      });
+
+      // Test HTTP one time request
+      $("#http_one_btn").click(function() {
+        console.log("Received raw SQL.");
+
+        var data = $('#message').val();
+
+        var startTime = $.now();
+        var endTime;
+        var totalTime;
 
         $.ajax({
           method: "POST",
           url: "http://127.0.0.1:4567/",
           data: {'query' : data},
           success: function(data) {
-            alert(data);
+              endTime = $.now();
+              totalTime = endTime - startTime;
+              console.log('Total time for 1 HTTP request: ' + totalTime);
           }
         });
 
         return false;
       });
+
+      // Test websocket successive requests
+      $("#ws_successive_btn").click(function() {
+
+        var startTime;
+        var endTime;
+        var totalTime;
+        var doneCounter = 0;
+
+        var query = $('#message').val();
+        socket = openWs();
+
+        socket.onopen = function() {
+          try {
+            startTime = $.now();
+            for(var i = 0; i < 100; i++) {
+              socket.send("connect");
+              socket.send("execute:" + query);
+              socket.send("fetchone");
+            }
+          } catch(exception) {
+            console.log('error...' + exception);
+          }
+        }
+
+        socket.onmessage = function(msg) {
+          if (msg.data.indexOf('Result:') != -1) {
+            doneCounter++;
+            if (doneCounter == 100) {
+              endTime = $.now();
+              totalTime = endTime - startTime;
+              socket.close();
+
+              console.log('Total time for 100 requests: ' + totalTime);
+            }
+          }
+        }
+
+        console.log('Socket state is ' + socket.readyState);
+
+        return false;
+      });
+
+      // Test websocket one request
+      $("#ws_one_btn").click(function() {
+
+        var startTime;
+        var endTime;
+        var totalTime;
+
+        var query = $('#message').val();
+        socket = openWs();
+
+        socket.onopen = function() {
+          try {
+            startTime = $.now();
+            socket.send("connect");
+            socket.send("execute:" + query);
+            socket.send("fetchone");
+          } catch(exception) {
+            console.log('error...' + exception);
+          }
+        }
+
+        socket.onmessage = function(msg) {
+          if (msg.data.indexOf('Result:') != -1) {
+            endTime = $.now();
+            totalTime = endTime - startTime;
+            console.log('Total time for 1 WS request: ' + totalTime);
+          }
+        }
+
+        console.log('Socket state is ' + socket.readyState);
+
+        return false;
+      });
     })
+
+    function openWs() {
+
+      var socket;
+      var host = "ws://localhost:4567/ws";
+
+      try {
+        var socket = new WebSocket(host);
+        console.log('Socket status: ' + socket.readyState);
+
+        socket.onclose = function() {
+          console.log('Socket status: ' + socket.readyState + ' (closed)');
+        }
+
+
+      } catch(exception) {
+        alert('Error: ' + exception);
+      }
+
+
+      return socket;
+    }
 
     </script>
   </head>
@@ -32,7 +167,12 @@
 		  <textarea id="message" name="message" cols="40" rows="30">
         SELECT "projects".* FROM "projects" ORDER BY rating DESC, created_at DESC LIMIT 3
       </textarea>
-		  <button id="http_btn" name="commit" type="submit">Test HTTP</button>
+		  <button id="http_one_btn" name="commit" type="submit">Test One HTTP Request</button>
+      <button id="http_successive_btn" name="commit" type="submit">Test 1000 HTTP Requests</button>
+      <button id="ws_one_btn" name="commit" type="submit">Test One WS Request</button>
+      <button id="ws_successive_btn" name="commit" type="submit">Test 1000 WS Request</button>
+
+
 </form>
 
   </body>
