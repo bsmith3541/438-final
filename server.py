@@ -26,8 +26,6 @@ class MainHandler(tornado.web.RequestHandler):
     self.write(json.dumps(results))
     conn.close()
 
-
-
 class WSHandler(tornado.websocket.WebSocketHandler):
   def open(self):
     self.driver = SqliteDriver(self)
@@ -73,8 +71,10 @@ class DriverThreaded(Driver):
 
     handler = self.determine_handler(cmd)
 
-    t = threading.Thread(target=handler, args=[cmd, args])
-    t.start()
+    # Turn off threading for experiment
+    # t = threading.Thread(target=handler, args=[cmd, args])
+    # t.start()
+    handler(cmd, args)
 
 class SqliteDriver(DriverThreaded):
   def __init__(self, channel):
@@ -120,7 +120,7 @@ class SqliteDriver(DriverThreaded):
     result = self.c.fetchone()
     jsoned = json.dumps(result)
 
-    self.channel.write_message(jsoned)
+    self.channel.write_message('Result: ' + jsoned)
 
   def handle_fetchall(self, cmd, args):
     results = self.c.fetchall()
